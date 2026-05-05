@@ -19,7 +19,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HUGO_ENVIRONMENT: production
-      NODE_OPTIONS: --permission --allow-fs-read=${{ github.workspace }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
