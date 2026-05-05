@@ -1,0 +1,6 @@
+{{ if and .Site.Params.analytics.goatcounter.enable .Site.Params.analytics.goatcounter.code hugo.IsProduction }}
+  <script
+    data-goatcounter="https://{{ .Site.Params.analytics.goatcounter.code }}.goatcounter.com/count"
+    async
+    src="//gc.zgo.at/count.js"></script>
+{{ end }}
