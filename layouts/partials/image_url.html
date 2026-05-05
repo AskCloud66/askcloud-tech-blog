@@ -1,0 +1,24 @@
+{{- $page := .page -}}
+{{- $image := printf "%v" .path -}}
+{{- if and $image (ne $image "<nil>") -}}
+  {{- $assetBaseURL := "" -}}
+  {{- if and $page $page.Site.Params.assets.baseURL -}}
+    {{- $assetBaseURL = strings.TrimSuffix "/" $page.Site.Params.assets.baseURL -}}
+  {{- end -}}
+  {{- $normalized := $image -}}
+  {{- if and (not (hasPrefix $normalized "/")) (not (hasPrefix $normalized "http://")) (not (hasPrefix $normalized "https://")) (not (hasPrefix $normalized "//")) -}}
+    {{- $normalized = printf "/%s" $normalized -}}
+  {{- end -}}
+  {{- $shouldExternalize := or (hasPrefix $normalized "/images/oscp/") (hasPrefix $normalized "/images/imported/") -}}
+  {{- if or (hasPrefix $image "http://") (hasPrefix $image "https://") (hasPrefix $image "//") -}}
+    {{- $image -}}
+  {{- else if and $assetBaseURL $shouldExternalize -}}
+    {{- printf "%s%s" $assetBaseURL $normalized -}}
+  {{- else -}}
+    {{- with resources.Get $image -}}
+      {{- .RelPermalink -}}
+    {{- else -}}
+      {{- $image | relURL -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
