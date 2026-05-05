@@ -1,0 +1,17 @@
+home:
+  empty_title: "AskCloud Tech Blog"
+  empty_body: "当前站点已切换到 Seven 主题骨架，但还没有可展示的内容。"
+article:
+  download_cover: "下载封面"
+  feedback_eyebrow: "互动"
+  feedback_title: "点赞与评论"
+  feedback_body: "当前方案基于 GitHub Discussions 承载讨论与反应，无需单独数据库，后续上线 GitHub 后即可持续沿用。"
+  feedback_like: "点赞"
+  feedback_liked: "已点赞"
+  feedback_comment: "前往互动区"
+  discussion_eyebrow: "GitHub 托管"
+  discussion_title: "文章讨论区"
+  discussion_body: "这里会承载文章评论与 GitHub Reactions 点赞，整体保持静态博客部署的简洁性。"
+  discussion_link: "打开 Discussions"
+  discussion_setup_title: "待配置 GitHub Discussions"
+  discussion_setup_body: "填入仓库、仓库 ID、分类与分类 ID 后，这里会自动启用评论与点赞。"
