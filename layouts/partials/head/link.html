@@ -3,16 +3,28 @@
   {{- with .Site.Params.app.svgFavicon -}}
     <link rel="icon" href="{{ partial "image_url.html" (dict "page" $page "path" .) }}" />
   {{- else -}}
-    <link rel="shortcut icon" type="image/x-icon" href="{{ "favicon.ico" | relURL }}" />
-    <link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | relURL }}" />
-    <link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon-16x16.png" | relURL }}" />
+    {{- if fileExists "static/favicon.ico" -}}
+      <link rel="shortcut icon" type="image/x-icon" href="{{ "favicon.ico" | relURL }}" />
+    {{- end -}}
+    {{- if fileExists "static/favicon-32x32.png" -}}
+      <link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32x32.png" | relURL }}" />
+    {{- end -}}
+    {{- if fileExists "static/favicon-16x16.png" -}}
+      <link rel="icon" type="image/png" sizes="16x16" href="{{ "favicon-16x16.png" | relURL }}" />
+    {{- end -}}
   {{- end -}}
-  <link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}" />
+  {{- if fileExists "static/apple-touch-icon.png" -}}
+    <link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}" />
+  {{- end -}}
   {{- with .Site.Params.app.iconColor -}}
-    <link rel="mask-icon" href="{{ "safari-pinned-tab.svg" | relURL }}" color="{{ . }}" />
+    {{- if fileExists "static/safari-pinned-tab.svg" -}}
+      <link rel="mask-icon" href="{{ "safari-pinned-tab.svg" | relURL }}" color="{{ . }}" />
+    {{- end -}}
   {{- end -}}
   {{- if eq .Site.Params.enablePWA true -}}
-    <link rel="manifest" href="{{ "site.webmanifest" | relURL }}" />
+    {{- if fileExists "static/site.webmanifest" -}}
+      <link rel="manifest" href="{{ "site.webmanifest" | relURL }}" />
+    {{- end -}}
   {{- end -}}
 {{- end -}}
 
