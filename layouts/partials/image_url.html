@@ -18,7 +18,7 @@
     {{- with resources.Get $image -}}
       {{- .RelPermalink -}}
     {{- else -}}
-      {{- $image | relURL -}}
+      {{- strings.TrimPrefix "/" $normalized | relURL -}}
     {{- end -}}
   {{- end -}}
 {{- end -}}
