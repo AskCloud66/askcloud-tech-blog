@@ -1,0 +1,98 @@
+<div
+  id="search-overlay"
+  class="site-search__overlay fixed inset-0 z-50 backdrop-blur-lg"
+  aria-hidden="true"></div>
+<section
+  id="search-section"
+  class="site-search hs-search fixed inset-0 z-50 flex h-dvh w-full flex-col"
+  aria-hidden="true">
+  <div
+    class="site-search__panel flex h-dvh w-full flex-col overflow-auto md:mx-auto md:w-2/3 lg:max-w-2xl">
+    <div
+      id="searchBoxDiv"
+      class="hs-search-input-wrapper sticky top-[-88px] z-50 flex flex-row justify-between px-8 pt-[88px]">
+      <div id="searchBox" class="site-search__input-shell my-6 flex w-full flex-row items-center">
+        <form id="search-form" class="site-search__form ais-SearchBox-form w-full" role="search">
+          <input
+            id="search-input"
+            class="site-search__input ais-SearchBox-input"
+            type="search"
+            placeholder="{{ T "search.placeholder" }}"
+            autocomplete="off"
+            spellcheck="false" />
+        </form>
+      </div>
+    </div>
+
+    <div class="site-search__results-wrapper hs-search-results-wrapper h-[30rem] overflow-auto">
+      <div id="searchResults" class="hs-search-results my-3 px-6"></div>
+      <div
+        id="NotSearchResults"
+        class="site-search__state site-search__state--empty hidden flex-col items-center justify-around space-y-4 px-6 py-10">
+        <p class="site-search__state-title hs-search-no-results text-lg font-bold tracking-wide">
+          {{ T "search.no_result" }}
+        </p>
+      </div>
+      <div
+        id="searchError"
+        class="site-search__state site-search__state--error hidden flex-col items-center justify-around space-y-4 px-6 py-10 text-center">
+        <p class="site-search__state-title hs-search-error text-lg font-bold">
+          {{ T "search.error" }}
+        </p>
+      </div>
+      <div
+        id="searchLoading"
+        class="site-search__state site-search__state--loading hidden flex-col items-center justify-around px-6 py-10">
+        <svg
+          t="1689331200868"
+          class="site-search__loading-icon icon animate-spin"
+          viewBox="0 0 1024 1024"
+          version="1.1"
+          xmlns="http://www.w3.org/2000/svg"
+          width="128"
+          height="128">
+          <path
+            d="M512 170.666667v85.333333a256 256 0 1 1-223.573333 131.2L213.930667 345.6A341.333333 341.333333 0 1 0 512 170.666667z"
+            fill="#bfbfbf"
+            opacity=".3"></path>
+        </svg>
+      </div>
+    </div>
+  </div>
+
+  <div
+    class="site-search__footer hs-search-other bottom-0 flex flex-col items-center justify-center space-y-2 py-8 text-xs font-bold">
+    <div class="site-search__footer-meta flex items-center justify-center gap-3">
+      <div class="site-search__cancel hs-search-cancel hidden md:block">
+        {{ T "search.cancel" }}
+      </div>
+      <button
+        id="search-close"
+        type="button"
+        class="site-search__close inline-flex items-center justify-center"
+        aria-label="{{ T "search.cancel" }}">
+        <svg
+          class="site-search__close-icon"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="1.8"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true">
+          <path d="M6 6l12 12M18 6 6 18" />
+        </svg>
+      </button>
+    </div>
+  </div>
+</section>
+
+{{ $searchInfo := dict
+  "indexURL" ("index.json" | relLangURL)
+  "maxResults" (.maxResults | default 20)
+}}
+{{ $searchJS := resources.Get "js/search.js" | js.Build (dict "params" $searchInfo) }}
+{{ if hugo.IsProduction }}
+  {{ $searchJS = $searchJS | minify | fingerprint }}
+{{ end }}
+<script src="{{ $searchJS.RelPermalink }}"></script>
