@@ -3,8 +3,8 @@
   {{ $logoInfo := .Site.Params.logo }}
   {{ $logoW := $logoInfo.customLogoWidth | default 56 }}
   {{ $logoH := math.Min ($logoInfo.customLogoHeight | default 56) 72 }}
-  {{ $lightLogo := $logoInfo.img }}
-  {{ $darkLogo := $logoInfo.img_dark | default $lightLogo }}
+  {{ $lightLogo := partial "image_url.html" (dict "page" . "path" $logoInfo.img) }}
+  {{ $darkLogo := partial "image_url.html" (dict "page" . "path" ($logoInfo.img_dark | default $logoInfo.img)) }}
 
   {{ if $lightLogo }}
     <span class="site-brand-logo__media" style="width: {{ $logoW }}px; height: {{ $logoH }}px;">
