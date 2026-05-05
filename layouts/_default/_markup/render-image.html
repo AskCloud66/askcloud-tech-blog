@@ -1,0 +1,22 @@
+{{- $destination := .Destination -}}
+{{- $resolved := "" -}}
+{{- if or (hasPrefix $destination "http://") (hasPrefix $destination "https://") (hasPrefix $destination "//") (hasPrefix $destination "/") -}}
+  {{- $resolved = partial "image_url.html" (dict "path" $destination "page" .Page) -}}
+{{- else -}}
+  {{- with .Page.Resources.GetMatch $destination -}}
+    {{- $resolved = .RelPermalink -}}
+  {{- else -}}
+    {{- with resources.Get $destination -}}
+      {{- $resolved = .RelPermalink -}}
+    {{- else -}}
+      {{- $resolved = $destination | relURL -}}
+    {{- end -}}
+  {{- end -}}
+{{- end -}}
+<img
+  src="{{ $resolved | safeURL }}"
+  alt="{{ .Text | plainify }}"
+  loading="lazy"
+  decoding="async"
+  {{- with .Title }} title="{{ . }}"{{- end -}}
+/>
