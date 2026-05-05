@@ -1,0 +1,17 @@
+home:
+  empty_title: "AskCloud Tech Blog"
+  empty_body: "The English site scaffold is live. Content will be added over time."
+article:
+  download_cover: "Download cover"
+  feedback_eyebrow: "Interaction"
+  feedback_title: "Reactions and comments"
+  feedback_body: "This section is designed for a lightweight GitHub-hosted discussion flow without a separate database."
+  feedback_like: "Like"
+  feedback_liked: "Liked"
+  feedback_comment: "Open discussion"
+  discussion_eyebrow: "GitHub hosted"
+  discussion_title: "Article discussion"
+  discussion_body: "Comments and reactions can be hosted here with a GitHub-native flow while keeping deployment simple."
+  discussion_link: "Open Discussions"
+  discussion_setup_title: "GitHub Discussions setup required"
+  discussion_setup_body: "Fill in the repo, repo ID, category, and category ID to enable comments and reactions here."
