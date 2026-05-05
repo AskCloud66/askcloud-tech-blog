@@ -1,0 +1,16 @@
+/public/
+/resources/
+/.hugo_cache/
+/.github-pages
+/.sass-cache/
+/hugo_stats.json
+/.hugo_build.lock
+/.idea/
+/.vscode/
+/node_modules/
+/scripts/
+/scripts/__pycache__/
+*.pyc
+Thumbs.db
+.DS_Store
+
