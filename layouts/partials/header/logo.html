@@ -1,0 +1,26 @@
+<a href="{{ "" | relLangURL }}" class="site-brand-logo p-1.5">
+  <span class="sr-only">{{ .Site.Title }}</span>
+  {{ $logoInfo := .Site.Params.logo }}
+  {{ $logoW := $logoInfo.customLogoWidth | default 56 }}
+  {{ $logoH := math.Min ($logoInfo.customLogoHeight | default 56) 72 }}
+  {{ $lightLogo := $logoInfo.img }}
+  {{ $darkLogo := $logoInfo.img_dark | default $lightLogo }}
+
+  {{ if $lightLogo }}
+    <span class="site-brand-logo__media" style="width: {{ $logoW }}px; height: {{ $logoH }}px;">
+      <img
+        x-cloak
+        x-show="!$store.darkMode.on"
+        src="{{ $lightLogo }}"
+        class="site-brand-logo__image"
+        alt="{{ .Site.Title }}" />
+      <img
+        x-cloak
+        x-show="$store.darkMode.on"
+        src="{{ $darkLogo }}"
+        class="site-brand-logo__image"
+        alt="{{ .Site.Title }}" />
+    </span>
+  {{ end }}
+
+</a>
