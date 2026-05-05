@@ -1,0 +1,149 @@
+.hs-content .chroma .k,
+.hs-content .chroma .kc,
+.hs-content .chroma .kd,
+.hs-content .chroma .kn,
+.hs-content .chroma .kp,
+.hs-content .chroma .kr,
+.hs-content .chroma .kt,
+.hs-content .chroma .nt {
+  color: rgb(30 64 175) !important;
+  font-weight: 700;
+}
+
+.hs-content .chroma .n,
+.hs-content .chroma .na,
+.hs-content .chroma .nb,
+.hs-content .chroma .bp,
+.hs-content .chroma .nc,
+.hs-content .chroma .nd,
+.hs-content .chroma .ne,
+.hs-content .chroma .nf,
+.hs-content .chroma .fm,
+.hs-content .chroma .nl,
+.hs-content .chroma .nn,
+.hs-content .chroma .no,
+.hs-content .chroma .nv,
+.hs-content .chroma .vc,
+.hs-content .chroma .vg,
+.hs-content .chroma .vi,
+.hs-content .chroma .vm {
+  color: rgb(194 65 12) !important;
+}
+
+.hs-content .chroma .s,
+.hs-content .chroma .sa,
+.hs-content .chroma .sb,
+.hs-content .chroma .sc,
+.hs-content .chroma .dl,
+.hs-content .chroma .sd,
+.hs-content .chroma .s1,
+.hs-content .chroma .s2,
+.hs-content .chroma .se,
+.hs-content .chroma .sh,
+.hs-content .chroma .si,
+.hs-content .chroma .sx,
+.hs-content .chroma .sr,
+.hs-content .chroma .ss {
+  color: rgb(4 120 87) !important;
+}
+
+.hs-content .chroma .m,
+.hs-content .chroma .mb,
+.hs-content .chroma .mf,
+.hs-content .chroma .mh,
+.hs-content .chroma .mi,
+.hs-content .chroma .il,
+.hs-content .chroma .mo {
+  color: rgb(147 51 234) !important;
+}
+
+.hs-content .chroma .c,
+.hs-content .chroma .c1,
+.hs-content .chroma .ch,
+.hs-content .chroma .cm,
+.hs-content .chroma .cp,
+.hs-content .chroma .cpf,
+.hs-content .chroma .cs {
+  color: rgb(100 116 139) !important;
+  font-style: italic;
+}
+
+.hs-content .chroma .o,
+.hs-content .chroma .ow,
+.hs-content .chroma .p {
+  color: rgb(190 24 93) !important;
+}
+
+.dark .hs-content .chroma .k,
+.dark .hs-content .chroma .kc,
+.dark .hs-content .chroma .kd,
+.dark .hs-content .chroma .kn,
+.dark .hs-content .chroma .kp,
+.dark .hs-content .chroma .kr,
+.dark .hs-content .chroma .kt,
+.dark .hs-content .chroma .nt {
+  color: rgb(147 197 253) !important;
+}
+
+.dark .hs-content .chroma .n,
+.dark .hs-content .chroma .na,
+.dark .hs-content .chroma .nb,
+.dark .hs-content .chroma .bp,
+.dark .hs-content .chroma .nc,
+.dark .hs-content .chroma .nd,
+.dark .hs-content .chroma .ne,
+.dark .hs-content .chroma .nf,
+.dark .hs-content .chroma .fm,
+.dark .hs-content .chroma .nl,
+.dark .hs-content .chroma .nn,
+.dark .hs-content .chroma .no,
+.dark .hs-content .chroma .nv,
+.dark .hs-content .chroma .vc,
+.dark .hs-content .chroma .vg,
+.dark .hs-content .chroma .vi,
+.dark .hs-content .chroma .vm {
+  color: rgb(251 146 60) !important;
+}
+
+.dark .hs-content .chroma .s,
+.dark .hs-content .chroma .sa,
+.dark .hs-content .chroma .sb,
+.dark .hs-content .chroma .sc,
+.dark .hs-content .chroma .dl,
+.dark .hs-content .chroma .sd,
+.dark .hs-content .chroma .s1,
+.dark .hs-content .chroma .s2,
+.dark .hs-content .chroma .se,
+.dark .hs-content .chroma .sh,
+.dark .hs-content .chroma .si,
+.dark .hs-content .chroma .sx,
+.dark .hs-content .chroma .sr,
+.dark .hs-content .chroma .ss {
+  color: rgb(110 231 183) !important;
+}
+
+.dark .hs-content .chroma .m,
+.dark .hs-content .chroma .mb,
+.dark .hs-content .chroma .mf,
+.dark .hs-content .chroma .mh,
+.dark .hs-content .chroma .mi,
+.dark .hs-content .chroma .il,
+.dark .hs-content .chroma .mo {
+  color: rgb(196 181 253) !important;
+}
+
+.dark .hs-content .chroma .c,
+.dark .hs-content .chroma .c1,
+.dark .hs-content .chroma .ch,
+.dark .hs-content .chroma .cm,
+.dark .hs-content .chroma .cp,
+.dark .hs-content .chroma .cpf,
+.dark .hs-content .chroma .cs {
+  color: rgb(148 163 184) !important;
+}
+
+.dark .hs-content .chroma .o,
+.dark .hs-content .chroma .ow,
+.dark .hs-content .chroma .p {
+  color: rgb(244 114 182) !important;
+}
