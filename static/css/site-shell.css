@@ -1,3 +1,9 @@
+@font-face {
+  font-family: "Antonio";
+  font-display: swap;
+  src: url("../font/Antonio-subset.woff2") format("woff2");
+}
+
 .site-brand-logo {
   display: inline-flex;
   align-items: center;
